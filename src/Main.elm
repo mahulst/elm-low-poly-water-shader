@@ -74,20 +74,26 @@ mesh =
 
         vs2 =
             square 0 1
+
+        vs3 =
+            square 1 0
+
+        vs4 =
+            square 1 1
     in
         WebGL.triangles
-            vs
+            (vs ++ vs2 ++ vs3 ++ vs4)
 
 
-square : Int -> Int -> List Triangle
-square x y =
-    [ ( Vertex (vec3 -1 0 -1) (vec3 1 0 0)
-      , Vertex (vec3 -1 0 1) (vec3 0 1 0)
-      , Vertex (vec3 1 0 1) (vec3 0 0 1)
+square : Float -> Float -> List Triangle
+square x z =
+    [ ( Vertex (vec3 (-1 + x * 2) 0 (-1 + z * 2)) (vec3 1 0 0)
+      , Vertex (vec3 (-1 + x * 2) 0 (1 + z * 2)) (vec3 0 1 0)
+      , Vertex (vec3 (1 + x * 2) 0 (1 + z * 2)) (vec3 0 0 1)
       )
-    , ( Vertex (vec3 1 0 1) (vec3 1 0 0)
-      , Vertex (vec3 1 0 -1) (vec3 0 1 0)
-      , Vertex (vec3 -1 0 -1) (vec3 0 0 1)
+    , ( Vertex (vec3 (1 + x * 2) 0 (1 + z * 2)) (vec3 1 0 0)
+      , Vertex (vec3 (1 + x * 2) 0 (-1 + z * 2)) (vec3 0 1 0)
+      , Vertex (vec3 (-1 + x * 2) 0 (-1 + z * 2)) (vec3 0 0 1)
       )
     ]
 
