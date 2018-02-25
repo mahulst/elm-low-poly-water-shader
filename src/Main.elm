@@ -37,7 +37,7 @@ view t =
             mesh
             { perspective = perspective
             , camera = camera
-            , t = t
+            , t = t / 1000
             }
         ]
 
@@ -127,11 +127,11 @@ type alias Uniforms =
 vertexShader : Shader Vertex Uniforms { vcolor : Vec3 }
 vertexShader =
     [glsl|
-
         attribute vec3 position;
         attribute vec3 color;
         uniform mat4 perspective;
         uniform mat4 camera;
+        uniform float t;
         varying vec3 vcolor;
 
         float getHeight(float x) {
@@ -139,8 +139,16 @@ vertexShader =
 
         }
 
+        float calculateSurface(float x, float z) {
+            float scale = 10.0;
+            float y = 0.0;
+            y += (sin(x * 1.0 / scale + t * 1.0) + sin(x * 2.3 / scale + t * 1.5) + sin(x * 3.3 / scale + t * 0.4)) / 3.0;
+            y += (sin(z * 0.2 / scale + t * 1.8) + sin(z * 1.8 / scale + t * 1.8) + sin(z * 2.8 / scale + t * 0.8)) / 3.0;
+            return y;
+        }
+
         void main () {
-            float y = getHeight(position.x);
+            float y = calculateSurface(position.x, position.z);
 
             gl_Position = perspective * camera * vec4(vec3(position.x, y, position.z), 1.0);
             vcolor = color;
