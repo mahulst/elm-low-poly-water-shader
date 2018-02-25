@@ -49,7 +49,7 @@ perspective =
 
 camera : Mat4
 camera =
-    Mat4.makeLookAt (vec3 15 50 75) (vec3 15 0 0) (vec3 0 1 0)
+    Mat4.makeLookAt (vec3 40 50 75) (vec3 15 0 0) (vec3 0 1 0)
 
 
 
@@ -61,7 +61,10 @@ type alias Triangle =
 
 
 type alias Vertex =
-    { position : Vec3
+    { position : Vec2
+    , vert1 : Vec2
+    , vert2 : Vec2
+    , vert3 : Vec2
     , color : Vec3
     }
 
@@ -99,15 +102,28 @@ rowOfSquares size z =
 
 square : Float -> Float -> List Triangle
 square x z =
-    [ ( Vertex (vec3 (-1 + x * 2) 0 (-1 + z * 2)) (vec3 1 0 0)
-      , Vertex (vec3 (-1 + x * 2) 0 (1 + z * 2)) (vec3 0 1 0)
-      , Vertex (vec3 (1 + x * 2) 0 (1 + z * 2)) (vec3 0 0 1)
-      )
-    , ( Vertex (vec3 (1 + x * 2) 0 (1 + z * 2)) (vec3 1 0 0)
-      , Vertex (vec3 (1 + x * 2) 0 (-1 + z * 2)) (vec3 0 1 0)
-      , Vertex (vec3 (-1 + x * 2) 0 (-1 + z * 2)) (vec3 0 0 1)
-      )
-    ]
+    let
+        no =
+            (vec2 (1 + x * 2) (-1 + z * 2))
+
+        nw =
+            (vec2 (-1 + x * 2) (-1 + z * 2))
+
+        so =
+            (vec2 (-1 + x * 2) (1 + z * 2))
+
+        sw =
+            (vec2 (1 + x * 2) (1 + z * 2))
+    in
+        [ ( Vertex nw nw so sw (vec3 1 0 0)
+          , Vertex so nw so sw (vec3 0 1 0)
+          , Vertex sw nw so sw (vec3 0 0 1)
+          )
+        , ( Vertex sw sw no nw (vec3 1 0 0)
+          , Vertex no sw no nw (vec3 0 1 0)
+          , Vertex nw sw no nw (vec3 0 0 1)
+          )
+        ]
 
 
 
@@ -127,31 +143,40 @@ type alias Uniforms =
 vertexShader : Shader Vertex Uniforms { vcolor : Vec3 }
 vertexShader =
     [glsl|
-        attribute vec3 position;
+        attribute vec2 position;
+        attribute vec2 vert1;
+        attribute vec2 vert2;
+        attribute vec2 vert3;
         attribute vec3 color;
         uniform mat4 perspective;
         uniform mat4 camera;
         uniform float t;
         varying vec3 vcolor;
 
-        float getHeight(float x) {
-             return (sin(x) + sin(2.2 * x + 5.52) + sin(2.9 * x + 0.93) + sin(4.6 *x + 8.94)) / 4.0;
-
-        }
-
         float calculateSurface(float x, float z) {
-            float scale = 10.0;
+            float scale = 30.0;
             float y = 0.0;
             y += (sin(x * 1.0 / scale + t * 1.0) + sin(x * 2.3 / scale + t * 1.5) + sin(x * 3.3 / scale + t * 0.4)) / 3.0;
             y += (sin(z * 0.2 / scale + t * 1.8) + sin(z * 1.8 / scale + t * 1.8) + sin(z * 2.8 / scale + t * 0.8)) / 3.0;
+            //y += cos(x * 1.25 - t) * sin(y * 0.75 + t) * 0.5;
+
+            // y += sin(sin(pos.x * 0.1 + t) * cos(pos.y * 0.1 + t)) * 1.0 + // small sinus wave
+            // y += cos(pos.x * 0.3 - t * 0.25) * sin(pos.y * 0.2 + t * 0.25) * 1.5 + // big sinus wave
             return y;
         }
 
-        void main () {
-            float y = calculateSurface(position.x, position.z);
 
-            gl_Position = perspective * camera * vec4(vec3(position.x, y, position.z), 1.0);
-            vcolor = color;
+
+        void main () {
+            float y = calculateSurface(position.x, position.y);
+
+            vec3 p1 = vec3(vert1.x, calculateSurface(vert1.x, vert1.y), vert1.y);
+            vec3 p2 = vec3(vert2.x, calculateSurface(vert2.x, vert2.y), vert2.y);
+            vec3 p3 = vec3(vert3.x, calculateSurface(vert3.x, vert3.y), vert3.y);
+            vec3 normal = normalize(cross(p2 - p3, p1 - p2));
+
+            gl_Position = perspective * camera * vec4(vec3(position.x, y, position.y), 1.0);
+            vcolor = normal;
         }
     |]
 
@@ -164,8 +189,12 @@ fragmentShader =
         varying vec3 vcolor;
 
         void main() {
-          vec3 terrainColor = vcolor;
-          gl_FragColor = vec4(terrainColor, 1.0);
-        }
 
+            vec3 terrainColor = vcolor;
+            terrainColor.x = 0.0;
+            terrainColor.y = 0.1;
+            terrainColor.z += 0.4;
+
+            gl_FragColor = vec4(terrainColor, 1.0);
+        }
     |]
