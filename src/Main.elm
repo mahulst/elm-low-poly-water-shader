@@ -49,11 +49,15 @@ perspective =
 
 camera : Mat4
 camera =
-    Mat4.makeLookAt (vec3 0 25 25) (vec3 0 0 0) (vec3 0 1 0)
+    Mat4.makeLookAt (vec3 0 10 10) (vec3 0 0 0) (vec3 0 1 0)
 
 
 
 -- Mesh
+
+
+type alias Triangle =
+    ( Vertex, Vertex, Vertex )
 
 
 type alias Vertex =
@@ -64,12 +68,28 @@ type alias Vertex =
 
 mesh : Mesh Vertex
 mesh =
-    WebGL.triangles
-        [ ( Vertex (vec3 1 0 0) (vec3 1 0 0)
-          , Vertex (vec3 0 0 -1) (vec3 0 1 0)
-          , Vertex (vec3 0 0 1) (vec3 0 0 1)
-          )
-        ]
+    let
+        vs =
+            square 0 0
+
+        vs2 =
+            square 0 1
+    in
+        WebGL.triangles
+            vs
+
+
+square : Int -> Int -> List Triangle
+square x y =
+    [ ( Vertex (vec3 -1 0 -1) (vec3 1 0 0)
+      , Vertex (vec3 -1 0 1) (vec3 0 1 0)
+      , Vertex (vec3 1 0 1) (vec3 0 0 1)
+      )
+    , ( Vertex (vec3 1 0 1) (vec3 1 0 0)
+      , Vertex (vec3 1 0 -1) (vec3 0 1 0)
+      , Vertex (vec3 -1 0 -1) (vec3 0 0 1)
+      )
+    ]
 
 
 
