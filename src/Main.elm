@@ -49,7 +49,7 @@ perspective =
 
 camera : Mat4
 camera =
-    Mat4.makeLookAt (vec3 40 50 75) (vec3 15 0 0) (vec3 0 1 0)
+    Mat4.makeLookAt (vec3 15 50 75) (vec3 15 0 0) (vec3 0 1 0)
 
 
 
@@ -154,14 +154,12 @@ vertexShader =
         varying vec3 vcolor;
 
         float calculateSurface(float x, float z) {
-            float scale = 30.0;
+            float scale = 20.0;
             float y = 0.0;
             y += (sin(x * 1.0 / scale + t * 1.0) + sin(x * 2.3 / scale + t * 1.5) + sin(x * 3.3 / scale + t * 0.4)) / 3.0;
             y += (sin(z * 0.2 / scale + t * 1.8) + sin(z * 1.8 / scale + t * 1.8) + sin(z * 2.8 / scale + t * 0.8)) / 3.0;
-            //y += cos(x * 1.25 - t) * sin(y * 0.75 + t) * 0.5;
+            y += cos(x * 1.25 - t) * sin(z * 0.75 + t) * 0.5;
 
-            // y += sin(sin(pos.x * 0.1 + t) * cos(pos.y * 0.1 + t)) * 1.0 + // small sinus wave
-            // y += cos(pos.x * 0.3 - t * 0.25) * sin(pos.y * 0.2 + t * 0.25) * 1.5 + // big sinus wave
             return y;
         }
 
@@ -193,7 +191,7 @@ fragmentShader =
             vec3 terrainColor = vcolor;
             terrainColor.x = 0.0;
             terrainColor.y = 0.1;
-            terrainColor.z += 0.4;
+            terrainColor.z += 0.6;
 
             gl_FragColor = vec4(terrainColor, 1.0);
         }
