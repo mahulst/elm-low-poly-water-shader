@@ -27,8 +27,8 @@ main =
 view : Float -> Html msg
 view t =
     WebGL.toHtml
-        [ width 400
-        , height 400
+        [ width 1000
+        , height 1000
         , style [ ( "display", "block" ) ]
         ]
         [ WebGL.entity
@@ -49,7 +49,7 @@ perspective =
 
 camera : Mat4
 camera =
-    Mat4.makeLookAt (vec3 0 10 10) (vec3 0 0 0) (vec3 0 1 0)
+    Mat4.makeLookAt (vec3 15 50 75) (vec3 15 0 0) (vec3 0 1 0)
 
 
 
@@ -69,20 +69,32 @@ type alias Vertex =
 mesh : Mesh Vertex
 mesh =
     let
-        vs =
-            square 0 0
+        size =
+            16
 
-        vs2 =
-            square 0 1
+        list =
+            List.range 0 size
 
-        vs3 =
-            square 1 0
+        fn x =
+            rowOfSquares size (toFloat x)
 
-        vs4 =
-            square 1 1
+        rows =
+            List.concatMap fn list
     in
         WebGL.triangles
-            (vs ++ vs2 ++ vs3 ++ vs4)
+            rows
+
+
+rowOfSquares : Int -> Float -> List Triangle
+rowOfSquares size z =
+    let
+        list =
+            List.range 0 size
+
+        fn x =
+            square (toFloat x) z
+    in
+        List.concatMap fn list
 
 
 square : Float -> Float -> List Triangle
