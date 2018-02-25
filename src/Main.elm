@@ -134,8 +134,15 @@ vertexShader =
         uniform mat4 camera;
         varying vec3 vcolor;
 
+        float getHeight(float x) {
+             return (sin(x) + sin(2.2 * x + 5.52) + sin(2.9 * x + 0.93) + sin(4.6 *x + 8.94)) / 4.0;
+
+        }
+
         void main () {
-            gl_Position = perspective * camera * vec4(position, 1.0);
+            float y = getHeight(position.x);
+
+            gl_Position = perspective * camera * vec4(vec3(position.x, y, position.z), 1.0);
             vcolor = color;
         }
     |]
